@@ -263,9 +263,162 @@ console.log("Edad: " + edadUsuario);
 - Acelera la carga (se puede usar caché).
 - Se pueden incluir múltiples archivos JS.
 
-### Mostrar información en JavaScript
+## Variables en JavaScript
 
-- `innerHTML`: escribe en un elemento HTML.
-- `document.write()`: escribe directamente en la salida HTML.
-- `window.alert()`: muestra un cuadro emergente.
-- `console.log()`: escribe en la consola del navegador.
+Las variables son **contenedores para almacenar datos o valores**.
+
+```javascript
+var x = 5;
+var y = 10;
+var z = x + y;
+```
+
+> En este ejemplo: `x`, `y` y `z` son variables.
+
+## `let` vs `var`
+
+### Alcance (`scope`)
+
+- `var`: su alcance es la **función** que la contiene. Está disponible desde el inicio de la función.
+- `let`: su alcance es el **bloque `{}`** donde se define. No está disponible antes de declararse.
+
+```javascript
+function testVar() {
+  if (true) {
+    var x = 5;
+  }
+  console.log(x); // 5
+}
+
+function testLet() {
+  if (true) {
+    let y = 10;
+  }
+  console.log(y); // ReferenceError
+}
+```
+
+## Tipos de datos
+
+En JavaScript, las variables pueden contener distintos tipos de datos:
+
+- Números
+- Cadenas de texto
+- Objetos
+- Booleanos
+- Arreglos (arrays)
+- `null`, `undefined`
+
+## Operando con tipos de datos
+
+### Ejemplo 1:
+
+```javascript
+var x = 16 + "Volvo"; // "16Volvo"
+```
+
+### Ejemplo 2:
+
+```javascript
+var x = "16" + "Volvo"; // "16Volvo"
+```
+
+> Cuando se suma un número con una cadena, JavaScript convierte todo a **string**.
+
+## Orden de evaluación
+
+```javascript
+var x = 16 + 4 + "Volvo"; // "20Volvo"
+var x = "Volvo" + 16 + 4; // "Volvo164"
+```
+
+> JS evalúa las expresiones **de izquierda a derecha**.
+
+## Tipado dinámico
+
+JavaScript tiene **tipado dinámico**, es decir, una variable puede cambiar de tipo:
+
+```javascript
+var x;         // x es undefined
+x = 5;         // ahora es number
+x = "John";    // ahora es string
+```
+
+## Cadenas de texto (strings)
+
+Las cadenas son texto rodeado de comillas:
+
+```javascript
+var text1 = "Hola! Bienvenidos al curso de JS";
+var text2 = "Hola! Bienvenidos al curso de 'JS'";
+var text3 = 'Hola! Bienvenidos al curso de "JS"';
+```
+
+> Se puede usar comillas simples o dobles.
+
+## Números
+
+Solo hay un tipo de dato numérico en JS, con o sin decimales:
+
+```javascript
+var x1 = 34.00;  // con decimal
+var x2 = 34;     // sin decimal
+```
+
+## Booleanos
+
+Solo dos valores posibles: `true` o `false`.
+
+```javascript
+var x = 5;
+var y = 5;
+var z = 6;
+
+(x == y); // true
+(x == z); // false
+```
+
+## Arreglos (arrays)
+
+Los arreglos se definen entre corchetes `[]`:
+
+```javascript
+var cars = ["Fiat", "Ford", "BMW"];
+```
+
+> Los índices comienzan desde `0`.
+
+```javascript
+cars[0]; // "Fiat"
+cars[1]; // "Ford"
+cars[2]; // "BMW"
+```
+
+## Objetos en JavaScript
+
+Los objetos se escriben entre llaves `{}`. Cada propiedad es un par `clave: valor`.
+
+```javascript
+var person = {
+  firstName: "John",
+  lastName: "Doe",
+  age: 50,
+  eyeColor: "blue"
+};
+```
+
+## Null
+
+- `null` representa **nada** intencionalmente.
+- El tipo de `null` es considerado un **object**, lo cual es una peculiaridad de JS.
+
+```javascript
+var person = {
+  firstName: "John",
+  lastName: "Doe",
+  age: 50,
+  eyeColor: "blue"
+};
+
+person = null; // El objeto ahora vale null
+```
