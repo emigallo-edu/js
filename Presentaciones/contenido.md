@@ -422,3 +422,356 @@ var person = {
 
 person = null; // El objeto ahora vale null
 ```
+
+## Teoría del Lenguaje en JavaScript
+
+### ¿Qué es la teoría del lenguaje de programación?
+
+La teoría del lenguaje estudia cómo están construidos los lenguajes de programación y cómo procesan las instrucciones que les damos.
+
+Todo lenguaje (como JavaScript) pasa por una serie de etapas de análisis para transformar el código que escribimos en acciones que la computadora pueda ejecutar.
+
+### Etapas del análisis del código
+
+Las etapas fundamentales por las que pasa un programa JavaScript son:
+
+1. Análisis léxico
+2. Análisis sintáctico
+3. Análisis semántico
+
+### 1. Análisis léxico
+
+El análisis léxico consiste en leer el código fuente y dividirlo en unidades mínimas llamadas *tokens*.
+
+Ejemplos de tokens:
+
+- Palabras clave: let, function, if
+- Identificadores: nombre, contador
+- Operadores: =, +, *
+- Números: 10, 3.14
+- Símbolos de puntuación: ;, {, }
+
+Ejemplo:
+
+let edad = 25;
+
+Tokens generados:
+
+- let → palabra clave
+- edad → identificador
+- = → operador de asignación
+- 25 → número
+- ; → punto y coma
+
+### 2. Análisis sintáctico
+
+El análisis sintáctico verifica que la estructura gramatical del código sea válida.
+
+Se forma un árbol sintáctico (AST – Abstract Syntax Tree) que representa la estructura jerárquica del código.
+
+Errores sintácticos comunes:
+
+- Paréntesis mal cerrados
+- Llaves faltantes
+- Punto y coma faltante
+- Orden incorrecto de palabras
+
+Ejemplo válido:
+
+```js
+if (edad > 18) {
+  console.log("Mayor de edad");
+}
+```
+
+### 3. Análisis semántico
+
+El análisis semántico verifica que las instrucciones tengan sentido lógico.
+
+Verifica cosas como:
+
+- Variables usadas sin declarar
+- Tipos de datos incompatibles
+- Operaciones sin sentido
+
+Ejemplo de error semántico:
+
+```js
+let edad = "veinte";
+if (edad > 18) {
+  console.log("Mayor");
+}
+```
+
+### Resumen
+
+Etapa | ¿Qué hace? | ¿Errores que detecta?
+------|------------|-----------------------
+Análisis léxico | Divide el código en tokens | Caracteres no válidos
+Análisis sintáctico | Verifica estructura gramatical | Errores de sintaxis
+Análisis semántico | Verifica el significado lógico del código | Errores de tipo o de contexto
+
+### Aplicación práctica
+
+Comprender estas etapas ayuda a:
+
+- Interpretar mejor los mensajes de error de JavaScript
+- Escribir código más limpio y predecible
+- Comprender cómo funcionan los motores de JavaScript (como V8 en Chrome)
+
+## Tipado en JavaScript
+
+El tipado se refiere a la forma en que un lenguaje de programación maneja los tipos de datos (como números, strings, booleanos, etc.).
+
+### Características del tipado en JavaScript
+
+#### 1. Tipado dinámico
+
+JavaScript es un lenguaje de **tipado dinámico**, lo que significa que:
+
+- No es necesario declarar el tipo de una variable al crearla.
+- El tipo de una variable puede cambiar en tiempo de ejecución.
+
+##### Ejemplo:
+
+```js
+let x = 5;       // x es un número
+x = "hola";      // ahora x es un string
+```
+
+#### 2. Tipado débil
+
+JavaScript tiene un **tipado débil**, lo que significa que:
+
+- El lenguaje convierte automáticamente entre tipos en ciertas operaciones.
+- Esto se conoce como *type coercion* (coerción de tipos), y puede generar resultados inesperados.
+
+##### Ejemplo:
+
+```js
+let resultado = "5" + 1;   // resultado = "51" (concatena)
+let suma = "5" - 1;        // suma = 4 (convierte "5" a número)
+```
+
+### Tipos de datos primitivos en JavaScript
+
+JavaScript tiene los siguientes tipos primitivos:
+
+- `string` → texto  
+- `number` → números (enteros y decimales)  
+- `boolean` → verdadero o falso  
+- `undefined` → variable declarada pero sin valor  
+- `null` → ausencia intencional de valor  
+- `symbol` → identificador único (ES6)  
+- `bigint` → números enteros muy grandes (ES2020)
+
+### Tipos de datos complejos
+
+- `object` → estructuras con propiedades y métodos
+- `array` → lista indexada de valores
+- `function` → bloques de código que se pueden invocar
+
+### Verificar el tipo de una variable
+
+Usamos el operador `typeof`:
+
+```js
+typeof "hola";     // "string"
+typeof 42;         // "number"
+typeof true;       // "boolean"
+typeof undefined;  // "undefined"
+typeof null;       // "object" (peculiaridad histórica)
+typeof {};         // "object"
+typeof [];         // "object"
+typeof function() {}; // "function"
+```
+
+### Resumen
+
+- JavaScript es un lenguaje **débilmente tipado** y **dinámico**.
+- Los tipos pueden cambiar y se pueden mezclar en operaciones.
+- Esto da flexibilidad, pero también puede llevar a errores difíciles de detectar.
+
+## Pasaje por Valor y por Referencia
+
+En JavaScript, las variables pueden contener datos **primitivos** o **referencias a objetos**. Esto afecta la forma en que los valores se copian y se pasan entre funciones.
+
+### 📌 Tipos de datos en JavaScript
+
+#### 1. Tipos primitivos (se pasan por **valor**):
+- `string`
+- `number`
+- `boolean`
+- `undefined`
+- `null`
+- `symbol`
+- `bigint`
+
+#### 2. Tipos por referencia:
+- `object`
+- `array`
+- `function`
+
+### 🔁 Pasaje por valor
+
+Cuando se asigna o se pasa un **tipo primitivo**, se copia el valor.
+
+```js
+let a = 10;
+let b = a;
+b = 20;
+
+console.log(a); // 10
+console.log(b); // 20
+```
+
+El valor de `a` no cambia porque `b` recibió una **copia** del valor.
+
+``` lua 
++--------+       +--------+
+|   a    | --->  |   10   |
++--------+       +--------+
+
++--------+       +--------+
+|   b    | --->  |   20   |
++--------+       +--------+
+```
+
+
+### 📦 Pasaje por referencia
+
+Cuando se asigna o se pasa un **objeto**, se copia la **referencia en memoria**, no el objeto.
+
+```js
+let obj1 = { nombre: "Ana" };
+let obj2 = obj1;
+
+obj2.nombre = "Luis";
+
+console.log(obj1.nombre); // "Luis"
+console.log(obj2.nombre); // "Luis"
+```
+
+Ambas variables apuntan al **mismo objeto en memoria**.
+
+``` lua 
++--------+       +-------------------+
+| obj1   | ---+--> { nombre: "Luis" }|
++--------+    |  +-------------------+
+              |
++--------+    |
+| obj2   | ---+
++--------+
+```
+
+### 🧪 Pasaje en funciones
+
+#### Por valor:
+
+```js
+function cambiarNumero(x) {
+  x = 100;
+}
+
+let numero = 5;
+cambiarNumero(numero);
+console.log(numero); // 5
+```
+
+#### Por referencia:
+
+```js
+function cambiarNombre(obj) {
+  obj.nombre = "Nuevo";
+}
+
+let persona = { nombre: "Original" };
+cambiarNombre(persona);
+console.log(persona.nombre); // "Nuevo"
+```
+
+### 🧠 Resumen
+
+| Tipo de dato       | Se pasa por     | Se copia el...         |
+|--------------------|-----------------|-------------------------|
+| Primitivo          | Valor           | Valor directamente      |
+| Objeto/Array       | Referencia      | Apuntador en memoria    |
+
+### ✅ Consejos prácticos
+
+- Para copiar un objeto sin compartir referencia, usá `Object.assign` o el operador spread (`{ ...obj }`).
+- Para copiar un array sin referencia, usá `slice()`, `concat()`, o spread (`[ ...arr ]`).
+
+## Manejo de Memoria en JavaScript: Pasaje por Valor y por Referencia
+
+JavaScript utiliza dos áreas principales de memoria: el stack (pila) y el heap (montículo). Cómo se almacena un valor depende del tipo de dato.
+
+### 📌 Áreas de memoria
+
+#### 1. Stack (pila)
+- Espacio de memoria pequeño y rápido.
+- Almacena tipos **primitivos** (`number`, `string`, `boolean`, etc.).
+- Las variables se almacenan directamente con su valor.
+
+#### 2. Heap (montículo)
+- Espacio más grande, menos estructurado.
+- Almacena **objetos, arrays y funciones**.
+- Las variables guardan **referencias** al contenido que está en el heap.
+
+### ✅ Pasaje por Valor (tipos primitivos)
+
+Cuando se asigna o pasa una variable primitiva, se copia el valor.
+
+```js
+let a = 5;
+let b = a;
+b = 10;
+```
+
+#### Memoria:
+
+```lua
+Stack:
+
++------+     +------+
+|  a   | --> |  5   |
++------+     +------+
+
++------+     +------+
+|  b   | --> | 10   |
++------+     +------+
+```
+
+### ✅ Pasaje por Referencia (objetos, arrays, funciones)
+
+Cuando se asigna o pasa un objeto, se copia la **referencia**, no el contenido.
+
+```js
+let obj1 = { saludo: "Hola" };
+let obj2 = obj1;
+obj2.saludo = "Chau";
+```
+
+#### Memoria:
+```lua
+Stack:                     Heap:
+
++-------+                 +-------------------+
+| obj1  | ---+           | { saludo: "Chau" } |
++-------+    |           +-------------------+
+             |
++-------+    |
+| obj2  | ---+
++-------+
+```
+
+### 🧹 Garbage Collection
+
+JavaScript gestiona automáticamente la memoria con un **garbage collector**. Este libera memoria en el heap cuando detecta que **ninguna variable hace referencia** a ese objeto.
+
+### 🧠 Resumen
+
+| Tipo de dato | Dónde vive  | Cómo se pasa      | Independencia |
+|--------------|-------------|-------------------|---------------|
+| Primitivo    | Stack       | Por valor         | ✅            |
+| Objeto/Array | Heap        | Por referencia    | ❌            |
