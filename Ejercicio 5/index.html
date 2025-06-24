@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="scripts/dom.js" defer></script>
+    <link rel="stylesheet" href="styles/tabla.css" />
+    <title>Ejercicio 5</title>
+</head>
+
+<body>
+    <div>
+        <p id="mensaje">Hola mundo</p>
+        <button onclick="cambiarTexto('mensaje')">Cambiar texto</button>
+    </div>
+    <div></div>
+    <p id="texto">Texto con estilo</p>
+    <button onclick="cambiarColor('texto')">Cambiar color</button>
+    </div>
+    <div>
+        <p id="info">Este texto se puede ocultar.</p>
+        <button onclick="toggle('info')">Mostrar/Ocultar</button>
+    </div>
+    <div>
+        <ul id="lista"></ul>
+        <button onclick="agregarItem('lista')">Agregar ítem</button>
+    </div>
+    <div>
+        <input id="nombre" placeholder="Escribí tu nombre">
+        <button onclick="saludar('nombre','saludo')">Saludar</button>
+        <p id="saludo"></p>
+    </div>
+    <div>
+        <p id="contador">0</p>
+        <button onclick="incrementar('contador')">➕</button>
+        <button onclick="reiniciar('contador')">🔄</button>
+    </div>
+    <div>
+        <button onclick="cambiarColor()">Cambiar color a todos los botones</button>
+    </div>
+</body>
+
+</html>
