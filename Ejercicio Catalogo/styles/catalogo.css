@@ -86,3 +86,10 @@ h2 {
 .tarjeta a:hover {
     background: var(--tierra);
 }
+
+.destacado {
+    background: var(--verde-claro);
+    border-left: 4px solid var(--verde);
+    padding: 0.5rem 1rem;
+    font-weight: bold;
+}
