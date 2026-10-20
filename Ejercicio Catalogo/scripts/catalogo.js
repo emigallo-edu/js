@@ -41,11 +41,21 @@ function crearTarjetaTexto(planta) {
 // Recorre el array y agrega una tarjeta por planta
 function renderizarCatalogo(plantas, contenedor) {
     plantas.forEach(planta => contenedor.appendChild(crearTarjeta(planta)));
+    // for (let i = 0; i < plantas.length; i++) {
+    //     const planta = plantas[i];
+    //     const tarjeta = crearTarjeta(planta);
+    //     contenedor.appendChild(tarjeta);
+    // }
 }
 
 // Junta todos los textos y el navegador los convierte en elementos
 function renderizarCatalogoTexto(plantas, contenedor) {
     contenedor.innerHTML = plantas.map(crearTarjetaTexto).join("");
+    // for (let i = 0; i < plantas.length; i++) {
+    //     const planta = plantas[i];
+    //     const tarjeta = crearTarjetaTexto(planta);
+    //     contenedor.innerHTML += tarjeta;
+    // }
 }
 
 // JSON.parse convierte el texto en un array de objetos
