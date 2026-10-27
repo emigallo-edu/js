@@ -994,3 +994,237 @@ const titulo = document.querySelector("h1");
 titulo.innerText = "Nuevo título desde JS";
 titulo.style.color = "blue";
 ```
+
+---------------------------
+
+## Asincronismo en JavaScript
+
+Los conceptos generales (sincrónico vs. asincrónico, bloqueante, concurrencia, paralelismo, Future/Promise, event loop, trabajo de E/S vs. CPU) están en [blog-tech: Asincronismo](https://github.com/emigallo-edu/blog-tech/blob/main/docs/asynchronism/content.md). Acá se ve cómo los implementa JavaScript.
+
+### Proceso sincrónico
+
+Los usuarios están en un array en memoria. La función devuelve el resultado en el momento y cada línea espera a la anterior:
+
+```js
+const usuarios = [{ id: 1, nombre: "Ana" }];
+
+function buscarUsuario(id) {
+  return usuarios.find(u => u.id === id);
+}
+
+console.log("inicio");
+const usuario = buscarUsuario(1);
+console.log(usuario.nombre);
+console.log("fin");
+// inicio, Ana, fin
+```
+
+### Proceso asincrónico
+
+Ahora los usuarios están en un servidor. Para consultarlo usamos `pedirAlServidor(ruta, alResponder)`: inicia el pedido, retorna **en el acto** y, cuando llega la respuesta (1 segundo después), llama a `alResponder` con el dato. Cómo está simulada se ve en el [anexo](#anexo-cómo-se-simula-el-servidor); para el tema no importa.
+
+```js
+console.log("inicio");
+const resultado = pedirAlServidor("/usuarios/1", usuario => console.log(usuario.nombre));
+console.log(resultado);
+console.log("fin");
+// inicio, undefined, fin, Ana
+```
+
+- La función no devuelve el usuario: cuando retorna, el usuario todavía no llegó.
+- El programa no espera: `fin` se imprime antes que `Ana`.
+- El resultado sólo se puede usar **cuando llega**. Las formas de manejar eso son las siguientes.
+
+### Forma 1: callbacks
+
+Pasar una función para que se ejecute con el resultado. El problema aparece cuando cada paso depende del anterior: buscar el usuario, después sus pedidos, después el detalle del primero.
+
+```js
+pedirAlServidor("/usuarios/1", usuario => {
+  pedirAlServidor(`/usuarios/${usuario.id}/pedidos`, pedidos => {
+    pedirAlServidor(`/pedidos/${pedidos[0].id}`, detalle => {
+      console.log(detalle.producto);
+    });
+  });
+});
+```
+
+Cada paso agrega un nivel de anidamiento (*callback hell*) y cada nivel tendría que manejar sus propios errores.
+
+### Forma 2: promesas (`Promise`)
+
+En lugar de recibir un callback, la función devuelve una **promesa**: un objeto que representa el resultado que va a llegar. Se crea con una función que recibe `resolve` (para entregar el resultado) y `reject` (para informar un error).
+
+```js
+function pedir(ruta) {
+  return new Promise((resolve, reject) => {
+    pedirAlServidor(ruta, dato => {
+      if (dato) resolve(dato);
+      else reject(new Error(`No existe ${ruta}`));
+    });
+  });
+}
+```
+
+Quien la usa se suscribe con `then` y `catch`:
+
+```js
+pedir("/usuarios/1")
+  .then(usuario => pedir(`/usuarios/${usuario.id}/pedidos`))
+  .then(pedidos => pedir(`/pedidos/${pedidos[0].id}`))
+  .then(detalle => console.log(detalle.producto))
+  .catch(error => console.error(error.message));
+```
+
+- `then` devuelve **otra** promesa; si su callback retorna una promesa, la siguiente espera a que se resuelva. Por eso los pasos se encadenan en vez de anidarse.
+- Un error en cualquier paso salta directo al `catch`.
+- Una promesa se resuelve **una sola vez**.
+
+### Forma 3: `async` / `await`
+
+Sintaxis sobre promesas que permite escribir la misma cadena como código secuencial:
+
+```js
+async function mostrarDetalle() {
+  try {
+    const usuario = await pedir("/usuarios/1");
+    const pedidos = await pedir(`/usuarios/${usuario.id}/pedidos`);
+    const detalle = await pedir(`/pedidos/${pedidos[0].id}`);
+    console.log(detalle.producto);
+  } catch (error) {
+    console.error(error.message);
+  }
+}
+
+console.log("inicio");
+mostrarDetalle();
+console.log("fin");
+// inicio, fin, Teclado
+```
+
+- `await` pausa **sólo esa función** hasta que la promesa se resuelve; el resto del programa sigue.
+- Una función `async` **siempre** devuelve una promesa.
+- `await` sólo se puede usar dentro de una función `async` o en el nivel superior de un **módulo** (`<script type="module">`).
+
+### ¿Cómo funciona por dentro? El event loop
+
+JavaScript ejecuta el código en **un único hilo**. Las esperas (timers, red, eventos del DOM) las hace el navegador por fuera; cuando terminan, deja la función pendiente en una **cola**. El **event loop** toma de la cola sólo cuando el código que se está ejecutando terminó. Por eso `fin` siempre se imprime antes que el resultado, aunque la respuesta llegue enseguida.
+
+Las continuaciones de promesas (`then`, lo que sigue a un `await`) van a una cola con **prioridad** sobre la de timers y eventos.
+
+### Bloquear el hilo
+
+Como hay un solo hilo, un cálculo largo congela la página: no se atienden clics ni respuestas hasta que termina. Ponerlo dentro de una función `async` **no** lo soluciona, porque sigue corriendo en el mismo hilo. El asincronismo sirve para **esperar** sin bloquear, no para calcular más rápido; el cálculo pesado se delega a un **Web Worker**.
+
+### Secuencial vs. paralelo
+
+Cada `await` espera antes de **iniciar** el siguiente pedido. Si los pedidos no dependen entre sí, conviene iniciarlos todos y esperarlos juntos:
+
+```js
+// secuencial: ~2 s
+const ana = await pedir("/usuarios/1");
+const beto = await pedir("/usuarios/2");
+
+// paralelo: ~1 s
+const [ana2, beto2] = await Promise.all([pedir("/usuarios/1"), pedir("/usuarios/2")]);
+```
+
+| Combinador           | Se resuelve cuando…   | Si alguna falla              |
+|----------------------|-----------------------|------------------------------|
+| `Promise.all`        | todas se cumplen      | rechaza con el primer error  |
+| `Promise.allSettled` | todas terminan        | no rechaza; informa cada una |
+| `Promise.race`       | la primera termina    | adopta el resultado de esa   |
+| `Promise.any`        | la primera se cumple  | rechaza sólo si fallan todas |
+
+### Errores frecuentes
+
+- **Olvidar el `await`**: se obtiene la promesa, no el valor (`console.log(pedir("/usuarios/1"))` → `Promise { <pending> }`).
+- **`await` dentro de `forEach`**: `forEach` no espera; usar `for...of` (secuencial) o `Promise.all` con `map` (paralelo).
+- **Promesa rechazada sin `catch`**: el error aparece como `Uncaught (in promise)` en la consola y nadie lo maneja.
+
+En la próxima sección se reemplaza la simulación por un pedido real: `fetch(url)` hace lo mismo que nuestra `pedir(ruta)` y devuelve una promesa.
+
+### Anexo: cómo se simula el servidor
+
+`setTimeout(funcion, ms)` ejecuta `funcion` después de `ms` milisegundos. Acá sólo se usa para imitar la demora de la red:
+
+```js
+const datos = {
+  "/usuarios/1": { id: 1, nombre: "Ana" },
+  "/usuarios/2": { id: 2, nombre: "Beto" },
+  "/usuarios/1/pedidos": [{ id: 10 }],
+  "/pedidos/10": { id: 10, producto: "Teclado" }
+};
+
+function pedirAlServidor(ruta, alResponder) {
+  setTimeout(() => alResponder(datos[ruta]), 1000);
+}
+```
+
+---------------------------
+
+## Llamado a una API
+
+### ¿Qué es una API?
+
+Una **API web** es un servicio que expone datos a través de URLs. El navegador le envía una **petición HTTP** (*request*) y el servidor contesta con una **respuesta** (*response*), normalmente en formato **JSON**.
+
+```
+https://api.open-meteo.com/v1/forecast?latitude=-34.6&longitude=-58.4&current=temperature_2m
+{protocolo}://{hostname}/{ruta del recurso}?{parámetros}
+```
+
+### Métodos HTTP más usados
+
+| Método   | Uso                    |
+|----------|------------------------|
+| `GET`    | Obtener datos          |
+| `POST`   | Crear un recurso       |
+| `PUT`    | Modificar un recurso   |
+| `DELETE` | Eliminar un recurso    |
+
+### `fetch` con `.then`
+
+`fetch` devuelve una promesa con la respuesta. `response.json()` devuelve **otra** promesa con el contenido ya convertido a objeto.
+
+```js
+const url = "https://api.open-meteo.com/v1/forecast?latitude=-34.6&longitude=-58.4&current=temperature_2m";
+
+fetch(url)
+  .then(response => response.json())
+  .then(datos => console.log(datos.current.temperature_2m))
+  .catch(error => console.error("Error de red:", error));
+```
+
+### `fetch` con `async` / `await`
+
+```js
+async function mostrarTemperatura(latitud, longitud) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitud}&longitude=${longitud}&current=temperature_2m`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const datos = await response.json();
+    document.getElementById("clima").innerText =
+      `${datos.current.temperature_2m} ${datos.current_units.temperature_2m}`;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+mostrarTemperatura(-41.14, -71.30);
+```
+
+`fetch` sólo rechaza la promesa ante errores de red; un `404` o un `500` llegan como respuesta normal, por eso se revisa `response.ok`.
+
+### Enviar datos (`POST`)
+
+```js
+await fetch(url, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ nombre: "Club Atlético" })
+});
+```
