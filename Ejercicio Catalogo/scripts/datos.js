@@ -10,3 +10,4 @@ function obtenerPlantas() {
         { "id": 6, "nombre": "Helecho", "nombreCientifico": "Nephrolepis exaltata", "categoria": "interior", "luz": "media sombra", "riego": "alto", "precio": 7300, "stock": 15, "fechaIngreso": "2026-06-01", "aptaMascotas": true, "etiquetas": ["colgante", "purificadora"], "foto": "img/helecho.png", "notas": "Pulverizar en verano." }
     ]`;
 }
+1
